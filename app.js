@@ -24,33 +24,18 @@ class Circular {
             }
 
             else if ( v.tcpu - this.quantum >= 0 ) {
-                this.calcTE(v)
 
-                this.tempo += this.quantum
-                v.tempoExec = this.tempo
-                this.tempo += this.tc
-
-                v.tcpu -= this.quantum
+                this.#calcCircular(v, this.quantum)
                 
             } else if ( v.tcpu - this.quantum < 0 ) {
-                this.calcTE(v)
 
-                this.tempo += v.tcpu
-                v.tempoExec = this.tempo
-                this.tempo += this.tc
-
-                v.tcpu = 0
+                this.#calcCircular(v, v.tcpu)
             }
 
         })
 
 
-        let num = 0
-        this.processos.forEach((v, i) => {
-            num += v.tempoEspera
-        })
-
-        this.tempoEsperaMedio = num / this.processos.length
+        this.#calcTEM()
 
         this.processos.forEach((v, i) => {
             v.tcpu != 0 ? this.exec() : ''
@@ -59,10 +44,36 @@ class Circular {
 
     }
 
-    calcTE(processo){
+    #calcCircular(processo, tempo){
+        this.#getTE(processo)
+
+        this.tempo += tempo
+        processo.tempoExec = this.tempo
+        this.tempo += this.tc
+
+        processo.tcpu -= tempo
+        processo.tcpu < 0 ? processo.tcpu = 0 : ''
+
+    }
+
+    #getTE(processo){
         processo.rotacao == 0 ? processo.tempoEspera = this.tempo - processo.ingresso : processo.tempoEspera += this.tempo - processo.tempoExec
         processo.rotacao += 1
 
+    }
+
+    #calcTEM() {
+        let num = 0
+        this.processos.forEach((v, i) => {
+            num += v.tempoEspera
+        })
+
+        this.tempoEsperaMedio = num / this.processos.length
+    }
+
+    getProcessos() {
+
+        return this.processos
     }
 
     teste(){
@@ -85,5 +96,7 @@ const objTeste = {
 
 const cir = new Circular(objTeste)
 
+console.log(cir.getProcessos())
 cir.exec()
+console.log(cir.getProcessos())
 cir.teste()
